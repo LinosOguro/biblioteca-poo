@@ -3,12 +3,14 @@
  */
 package edu.curso;
 
+import edu.curso.view.LoginBoundary;
+
 public class App {
     public String getGreeting() {
         return "Hello World!";
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        LoginBoundary.launch(LoginBoundary.class, args);
     }
 }

@@ -1,5 +1,7 @@
 package edu.curso.model;
 
+import java.util.Date;
+
 public class Usuario {
     private Long id;
     private String nome;
