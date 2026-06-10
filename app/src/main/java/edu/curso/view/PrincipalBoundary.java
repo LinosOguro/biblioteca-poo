@@ -1,5 +1,6 @@
 package edu.curso.view;
 
+import edu.curso.model.Usuario;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -7,9 +8,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import edu.curso.model.Usuario;
 
 public class PrincipalBoundary extends Application {
     
@@ -21,6 +22,9 @@ public class PrincipalBoundary extends Application {
     
     public void start(Stage stage, Usuario usuario) throws Exception {
         usuarioLogado = usuario;
+        
+        BorderPane root = new BorderPane();
+        root.setTop(AppMenu.createMenuBar(stage, usuario));
         
         VBox vb = new VBox(20);
         vb.setAlignment(Pos.CENTER);
@@ -39,7 +43,7 @@ public class PrincipalBoundary extends Application {
         bLivros.setStyle("-fx-font-size: 14;");
         bLivros.setOnAction(e -> {
             try {
-                new LivroBoundary().start(new Stage());
+                new LivroBoundary().start(new Stage(), usuario);
             } catch (Exception ex) {
                 new Alert(AlertType.ERROR, "Erro ao abrir gerenciador de livros: " + ex.getMessage()).show();
             }
@@ -50,7 +54,7 @@ public class PrincipalBoundary extends Application {
         bAutores.setStyle("-fx-font-size: 14;");
         bAutores.setOnAction(e -> {
             try {
-                new AutorBoundary().start(new Stage());
+                new AutorBoundary().start(new Stage(), usuario);
             } catch (Exception ex) {
                 new Alert(AlertType.ERROR, "Erro ao abrir gerenciador de autores: " + ex.getMessage()).show();
             }
@@ -61,7 +65,7 @@ public class PrincipalBoundary extends Application {
         bEmprestimos.setStyle("-fx-font-size: 14;");
         bEmprestimos.setOnAction(e -> {
             try {
-                new EmprestimoBoundary().start(new Stage());
+                new EmprestimoBoundary().start(new Stage(), usuario);
             } catch (Exception ex) {
                 new Alert(AlertType.ERROR, "Erro ao abrir gerenciador de empréstimos: " + ex.getMessage()).show();
             }
@@ -80,8 +84,9 @@ public class PrincipalBoundary extends Application {
         });
         
         vb.getChildren().addAll(titulo, bLivros, bAutores, bEmprestimos, bSair);
+        root.setCenter(vb);
         
-        Scene scene = new Scene(vb, 600, 500);
+        Scene scene = new Scene(root, 600, 500);
         stage.setScene(scene);
         stage.setTitle("Sistema de Biblioteca - Menu Principal");
         stage.show();
