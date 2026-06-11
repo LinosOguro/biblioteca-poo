@@ -5,9 +5,6 @@ Sistema corporativo de gerenciamento de biblioteca em **Java 21 + JavaFX + Maria
 dividido nas camadas **Fronteira (view), Controle (control), Entidade (model),
 DAO (dao) e Segurança (security)**, protegido por usuário e senha com **2 perfis
 de acesso** (ADMIN e COMUM).
-Integrantes:
-  - Enzo Oguro Linos
-  - Leonardo Alencar Bordoni
 
 ## Integrantes
 - Enzo Oguro Linos
