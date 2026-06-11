@@ -52,5 +52,3 @@ view (Fronteira)  ->  control (Controle)  ->  dao (DAO)  ->  MariaDB
       |                     |
       +----- security (Sessão / perfis)    model (Entidade) circula entre as camadas
 ```
-
-Leia o **GUIA-DO-CODIGO.md** para entender o fluxo completo e como modificar o sistema.
