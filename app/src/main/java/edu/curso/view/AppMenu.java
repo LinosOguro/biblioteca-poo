@@ -1,84 +1,76 @@
 package edu.curso.view;
 
-import edu.curso.model.Usuario;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import edu.curso.security.Sessao;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
+/**
+ * CAMADA FRONTEIRA (Boundary) - Barra de menu compartilhada pelas telas.
+ *
+ * Classe utilitaria (metodo estatico): cada tela chama
+ * AppMenu.criarMenu(stage) e coloca a barra no topo do BorderPane.
+ *
+ * A barra tambem respeita os PERFIS: os itens "Autores" e "Usuarios"
+ * so sao adicionados quando o usuario logado eh ADMIN.
+ */
 public class AppMenu {
 
-    public static MenuBar createMenuBar(Stage stage, Usuario usuario) {
-        MenuBar menuBar = new MenuBar();
+    public static MenuBar criarMenu(Stage stage) {
+        MenuBar barra = new MenuBar();
 
+        // ---- Menu Navegar ----
         Menu menuNavegar = new Menu("Navegar");
-        MenuItem mInicio = new MenuItem("Início");
-        MenuItem mLivros = new MenuItem("Livros");
-        MenuItem mAutores = new MenuItem("Autores");
-        MenuItem mEmprestimos = new MenuItem("Empréstimos");
 
-        mInicio.setOnAction(e -> openPrincipal(stage, usuario));
-        mLivros.setOnAction(e -> openLivro(stage, usuario));
-        mAutores.setOnAction(e -> openAutor(stage, usuario));
-        mEmprestimos.setOnAction(e -> openEmprestimo(stage, usuario));
-
-        menuNavegar.getItems().addAll(mInicio, mLivros, mAutores, mEmprestimos);
-
-        Menu menuAplicacao = new Menu("Aplicação");
-        MenuItem mSair = new MenuItem("Logout");
-        mSair.setOnAction(e -> {
+        MenuItem mInicio = new MenuItem("Inicio");
+        mInicio.setOnAction(e -> {
+            new PrincipalBoundary().start(new Stage());
             stage.close();
-            try {
-                new LoginBoundary().start(new Stage());
-            } catch (Exception ex) {
-                showError("Erro ao retornar para o login: " + ex.getMessage());
-            }
         });
-        menuAplicacao.getItems().add(mSair);
 
-        menuBar.getMenus().addAll(menuNavegar, menuAplicacao);
-        return menuBar;
-    }
-
-    private static void openPrincipal(Stage stage, Usuario usuario) {
-        try {
-            new PrincipalBoundary().start(new Stage(), usuario);
+        MenuItem mLivros = new MenuItem("Livros");
+        mLivros.setOnAction(e -> {
+            new LivroBoundary().start(new Stage());
             stage.close();
-        } catch (Exception ex) {
-            showError("Erro ao abrir tela inicial: " + ex.getMessage());
-        }
-    }
+        });
 
-    private static void openLivro(Stage stage, Usuario usuario) {
-        try {
-            new LivroBoundary().start(new Stage(), usuario);
+        MenuItem mEmprestimos = new MenuItem("Emprestimos");
+        mEmprestimos.setOnAction(e -> {
+            new EmprestimoBoundary().start(new Stage());
             stage.close();
-        } catch (Exception ex) {
-            showError("Erro ao abrir gerenciador de livros: " + ex.getMessage());
-        }
-    }
+        });
 
-    private static void openAutor(Stage stage, Usuario usuario) {
-        try {
-            new AutorBoundary().start(new Stage(), usuario);
+        menuNavegar.getItems().addAll(mInicio, mLivros, mEmprestimos);
+
+        // Itens exclusivos do ADMIN (o COMUM nem ve essas opcoes).
+        if (Sessao.isAdmin()) {
+            MenuItem mAutores = new MenuItem("Autores");
+            mAutores.setOnAction(e -> {
+                new AutorBoundary().start(new Stage());
+                stage.close();
+            });
+
+            MenuItem mUsuarios = new MenuItem("Usuarios");
+            mUsuarios.setOnAction(e -> {
+                new UsuarioBoundary().start(new Stage());
+                stage.close();
+            });
+
+            menuNavegar.getItems().addAll(mAutores, mUsuarios);
+        }
+
+        // ---- Menu Aplicacao ----
+        Menu menuAplicacao = new Menu("Aplicacao");
+        MenuItem mLogout = new MenuItem("Logout");
+        mLogout.setOnAction(e -> {
+            Sessao.logout();   // encerra a sessao do usuario
             stage.close();
-        } catch (Exception ex) {
-            showError("Erro ao abrir gerenciador de autores: " + ex.getMessage());
-        }
-    }
+            new LoginBoundary().start(new Stage());
+        });
+        menuAplicacao.getItems().add(mLogout);
 
-    private static void openEmprestimo(Stage stage, Usuario usuario) {
-        try {
-            new EmprestimoBoundary().start(new Stage(), usuario);
-            stage.close();
-        } catch (Exception ex) {
-            showError("Erro ao abrir gerenciador de empréstimos: " + ex.getMessage());
-        }
-    }
-
-    private static void showError(String message) {
-        new Alert(AlertType.ERROR, message).show();
+        barra.getMenus().addAll(menuNavegar, menuAplicacao);
+        return barra;
     }
 }

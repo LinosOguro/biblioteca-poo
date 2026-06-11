@@ -1,7 +1,17 @@
 package edu.curso.model;
 
-import java.util.Date;
-
+/**
+ * CAMADA ENTIDADE - Usuario do sistema (7 campos).
+ *
+ * Representa uma linha da tabela "usuario" do banco. Classe simples,
+ * apenas com atributos + getters/setters (padrao JavaBean). Os getters
+ * tambem sao usados pela TableView (via PropertyValueFactory) para
+ * preencher as colunas: PropertyValueFactory("nome") chama getNome().
+ *
+ * Observacoes:
+ *  - O campo "nome" tambem funciona como LOGIN do sistema.
+ *  - "perfil" define o nivel de acesso: "ADMIN" ou "COMUM".
+ */
 public class Usuario {
     private Long id;
     private String nome;
@@ -9,16 +19,18 @@ public class Usuario {
     private String telefone;
     private String cpf;
     private String senha;
+    private String perfil;   // "ADMIN" ou "COMUM"
 
     public Usuario() {
     }
 
-    public Usuario(String nome, String email, String telefone, String cpf, String senha) {
+    public Usuario(String nome, String email, String telefone, String cpf, String senha, String perfil) {
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
         this.cpf = cpf;
         this.senha = senha;
+        this.perfil = perfil;
     }
 
     public Long getId() {
@@ -69,15 +81,25 @@ public class Usuario {
         this.senha = senha;
     }
 
+    public String getPerfil() {
+        return perfil;
+    }
+
+    public void setPerfil(String perfil) {
+        this.perfil = perfil;
+    }
+
+    /** Atalho da seguranca: este usuario tem o perfil de administrador? */
+    public boolean isAdmin() {
+        return "ADMIN".equals(perfil);
+    }
+
+    /**
+     * Texto exibido quando o objeto aparece em um ComboBox
+     * (ex: escolha do usuario na tela de Emprestimos).
+     */
     @Override
     public String toString() {
-        return "Usuario{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", email='" + email + '\'' +
-                ", telefone='" + telefone + '\'' +
-                ", cpf='" + cpf + '\'' +
-                ", senha='" + senha + '\'' +
-                '}';
+        return id + " - " + nome;
     }
 }

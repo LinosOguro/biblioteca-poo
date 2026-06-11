@@ -2,6 +2,13 @@ package edu.curso.model;
 
 import java.time.LocalDate;
 
+/**
+ * CAMADA ENTIDADE - Autor de livros (6 campos).
+ *
+ * Representa uma linha da tabela "autor" do banco. Os getters sao usados
+ * pela TableView (PropertyValueFactory("nome") chama getNome(), e assim
+ * por diante para cada coluna).
+ */
 public class Autor {
     private Long id;
     private String nome;
@@ -69,15 +76,12 @@ public class Autor {
         this.biografia = biografia;
     }
 
+    /**
+     * Texto exibido quando o objeto aparece em um ComboBox
+     * (ex: escolha do autor na tela de Livros).
+     */
     @Override
     public String toString() {
-        return "Autor{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", nacionalidade='" + nacionalidade + '\'' +
-                ", dataNasc=" + dataNasc +
-                ", email='" + email + '\'' +
-                ", biografia='" + biografia + '\'' +
-                '}';
+        return id + " - " + nome;
     }
 }

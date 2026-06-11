@@ -1,118 +1,91 @@
 package edu.curso.dao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import edu.curso.model.Autor;
 
+/**
+ * CAMADA DAO - Implementacao do acesso a dados de Autor com JDBC + MariaDB.
+ *
+ * Padrao usado em TODOS os metodos:
+ *  1. Escrever o SQL com "?" no lugar dos valores (PreparedStatement evita
+ *     SQL Injection e cuida da formatacao de datas, aspas etc).
+ *  2. Abrir a conexao com try-with-resources: o "try (...)" fecha a conexao
+ *     e o statement automaticamente no final, mesmo se der erro.
+ *  3. Preencher cada "?" com stm.setXxx(posicao, valor) - posicao comeca em 1.
+ *  4. executeUpdate() para INSERT/UPDATE/DELETE; executeQuery() para SELECT.
+ */
 public class AutorDAOImpl implements AutorDAO {
-    private static final String DB_JDBC_URI = "jdbc:mariadb://localhost:3306/biblioteca?allowPublicKeyRetrieval=true&useSSL=false&allowMultiQueries=true";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "123456";
-    private Connection con;
-
-    public AutorDAOImpl() {
-        System.out.println("Autor DAO criado - com database");
-        try {
-            Class.forName("org.mariadb.jdbc.Driver");
-            System.out.println("Classe carregada...");
-            con = DriverManager.getConnection(DB_JDBC_URI, DB_USER, DB_PASS);
-            System.out.println("Conexao foi feita com sucesso");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Erro ao carregar a classe");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.out.println("Erro ao conectar");
-            e.printStackTrace();
-        }
-    }
 
     @Override
-    public void cadastrar(Autor a) {
-        try {
-            String sql = "INSERT INTO autor (nome, nacionalidade, dataNasc, email, biografia) VALUES " +
-                    "(?, ?, ?, ?, ?)";
-            PreparedStatement stm = con.prepareStatement(sql);
+    public void cadastrar(Autor a) throws SQLException {
+        String sql = "INSERT INTO autor (nome, nacionalidade, dataNasc, email, biografia) "
+                   + "VALUES (?, ?, ?, ?, ?)";
+        try (Connection con = ConexaoFactory.getConexao();
+             PreparedStatement stm = con.prepareStatement(sql)) {
             stm.setString(1, a.getNome());
             stm.setString(2, a.getNacionalidade());
-            stm.setDate(3, java.sql.Date.valueOf(a.getDataNasc()));
+            stm.setDate(3, java.sql.Date.valueOf(a.getDataNasc())); // LocalDate -> DATE do banco
             stm.setString(4, a.getEmail());
             stm.setString(5, a.getBiografia());
             stm.executeUpdate();
-            System.out.println("Comando executado com sucesso");
-        } catch (SQLException e) {
-            System.out.println("Erro ao conectar");
-            e.printStackTrace();
         }
     }
 
     @Override
-    public List<Autor> consultarPorNome(String nome) {
+    public List<Autor> consultarPorNome(String nome) throws SQLException {
+        // LIKE %texto% busca por parte do nome. Com nome = "" vira LIKE '%%',
+        // que casa com tudo -> serve como "listar todos".
         List<Autor> lista = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM autor WHERE nome LIKE ?";
-            PreparedStatement stm = con.prepareStatement(sql);
+        String sql = "SELECT * FROM autor WHERE nome LIKE ? ORDER BY nome";
+        try (Connection con = ConexaoFactory.getConexao();
+             PreparedStatement stm = con.prepareStatement(sql)) {
             stm.setString(1, "%" + nome + "%");
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) {
-                Long id = rs.getLong("id");
-                String autorNome = rs.getString("nome");
-                String nacionalidade = rs.getString("nacionalidade");
-                LocalDate dataNasc = rs.getDate("dataNasc").toLocalDate();
-                String email = rs.getString("email");
-                String biografia = rs.getString("biografia");
-                Autor a = new Autor();
-                a.setId(id);
-                a.setNome(autorNome);
-                a.setNacionalidade(nacionalidade);
-                a.setDataNasc(dataNasc);
-                a.setEmail(email);
-                a.setBiografia(biografia);
-                lista.add(a);
+            try (ResultSet rs = stm.executeQuery()) {
+                // rs.next() avanca para a proxima linha do resultado;
+                // o while percorre todas as linhas e monta um objeto por linha.
+                while (rs.next()) {
+                    Autor a = new Autor();
+                    a.setId(rs.getLong("id"));
+                    a.setNome(rs.getString("nome"));
+                    a.setNacionalidade(rs.getString("nacionalidade"));
+                    a.setDataNasc(rs.getDate("dataNasc").toLocalDate());
+                    a.setEmail(rs.getString("email"));
+                    a.setBiografia(rs.getString("biografia"));
+                    lista.add(a);
+                }
             }
-            System.out.println("Comando executado com sucesso");
-        } catch (SQLException e) {
-            System.out.println("Erro ao conectar");
-            e.printStackTrace();
         }
         return lista;
     }
 
     @Override
-    public void atualizar(long id, Autor a) {
-        try {
-            String sql = "UPDATE autor SET nome = ?, nacionalidade = ?, dataNasc = ?, email = ?, biografia = ? WHERE id = ?";
-            PreparedStatement stm = con.prepareStatement(sql);
+    public void atualizar(long id, Autor a) throws SQLException {
+        String sql = "UPDATE autor SET nome = ?, nacionalidade = ?, dataNasc = ?, "
+                   + "email = ?, biografia = ? WHERE id = ?";
+        try (Connection con = ConexaoFactory.getConexao();
+             PreparedStatement stm = con.prepareStatement(sql)) {
             stm.setString(1, a.getNome());
             stm.setString(2, a.getNacionalidade());
             stm.setDate(3, java.sql.Date.valueOf(a.getDataNasc()));
             stm.setString(4, a.getEmail());
             stm.setString(5, a.getBiografia());
-            stm.setLong(6, id);
+            stm.setLong(6, id);  // WHERE id = ? -> qual registro alterar
             stm.executeUpdate();
-            System.out.println("Autor atualizado com sucesso");
-        } catch (SQLException e) {
-            System.out.println("Erro ao conectar");
-            e.printStackTrace();
         }
     }
 
     @Override
-    public void apagar(long id) {
-        try {
-            String sql = "DELETE FROM autor WHERE id = ?";
-            PreparedStatement stm = con.prepareStatement(sql);
+    public void apagar(long id) throws SQLException {
+        String sql = "DELETE FROM autor WHERE id = ?";
+        try (Connection con = ConexaoFactory.getConexao();
+             PreparedStatement stm = con.prepareStatement(sql)) {
             stm.setLong(1, id);
             stm.executeUpdate();
-            System.out.println("Autor apagado com sucesso");
-        } catch (SQLException e) {
-            System.out.println("Erro ao conectar");
-            e.printStackTrace();
         }
     }
 }
