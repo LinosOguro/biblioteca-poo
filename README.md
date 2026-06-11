@@ -11,7 +11,7 @@ de acesso** (ADMIN e COMUM).
 - Leonardo Alencar Bordoni
 
 ## Link do Vídeo explicativo:
-*(colar aqui)*
+https://youtu.be/nShbP4b2Ia4
 
 ## ODS — Objetivo de Desenvolvimento Sustentável
 Este trabalho se relaciona com o **ODS 4 — Educação de Qualidade**: o sistema
