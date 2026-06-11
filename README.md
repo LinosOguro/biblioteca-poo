@@ -54,4 +54,3 @@ view (Fronteira)  ->  control (Controle)  ->  dao (DAO)  ->  MariaDB
 ```
 
 Leia o **GUIA-DO-CODIGO.md** para entender o fluxo completo e como modificar o sistema.
-Link do Vídeo explicativo:
